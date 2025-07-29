@@ -4,6 +4,8 @@ use std::io::Read;
 enum ProgramError {
     WrongNumberOfArguments,
     FileOpenError,
+    FileIsDirectory,
+    GeneralError,
 }
 
 fn check_args(args: &[String]) -> Result<(), ProgramError> {
@@ -18,6 +20,15 @@ fn prepare_file(path: &str) -> Result<BufReader<File>, ProgramError> {
         Ok(file) => file,
         Err(_) => return Err(ProgramError::FileOpenError),
     };
+    
+    match f.metadata() {
+        Ok(metadata) => {
+            if metadata.is_dir() {
+                return Err(ProgramError::FileIsDirectory);
+            }
+        }
+        Err(_) => return Err(ProgramError::GeneralError),
+    }
 
     let reader = BufReader::new(f);
 
@@ -31,6 +42,12 @@ fn handle_errors(err: ProgramError) {
         }
         ProgramError::FileOpenError => {
             eprintln!("Error: failed to open file");
+        }
+        ProgramError::FileIsDirectory => {
+            eprintln!("Error: file is directory");
+        }
+        ProgramError::GeneralError => {
+            eprintln!("Error: something went wrong");
         }
     }
 
