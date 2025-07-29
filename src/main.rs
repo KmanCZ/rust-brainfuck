@@ -1,5 +1,5 @@
-use std::env;
-#[derive(Debug)]
+use std::{env, process};
+
 enum ProgramError {
     WrongNumberOfArguments,
 }
@@ -10,11 +10,19 @@ fn check_args(args: &[String]) -> Result<(), ProgramError> {
     }
     Ok(())
 }
-fn main() -> Result<(), ProgramError> {
-    let args: Vec<String> = env::args().skip(1).collect();
-    if let Err(err) = check_args(&args) {
-        return Err(err);
+
+fn handle_errors(err: ProgramError) {
+    match err {
+        ProgramError::WrongNumberOfArguments => {
+            eprintln!("Error: wrong number of arguments");
+        }
     }
     
-    Ok(())
+    process::exit(1);
+}
+fn main() {
+    let args: Vec<String> = env::args().skip(1).collect();
+    if let Err(err) = check_args(&args) {
+        handle_errors(err);
+    }
 }
