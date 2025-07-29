@@ -35,7 +35,7 @@ fn prepare_file(path: &str) -> Result<BufReader<File>, ProgramError> {
     Ok(reader)
 }
 
-fn handle_errors(err: ProgramError) {
+fn handle_errors(err: ProgramError) -> ! {
     match err {
         ProgramError::WrongNumberOfArguments => {
             eprintln!("Error: wrong number of arguments");
@@ -64,7 +64,6 @@ fn main() {
         Ok(file) => file,
         Err(err) => {
             handle_errors(err);
-            return;
         }
     };
 
