@@ -1,10 +1,11 @@
 use std::{env, process, fs::File, io::BufReader};
-use std::io::Read;
+use brainfuck::Lexer;
 
 enum ProgramError {
     WrongNumberOfArguments,
     FileOpenError,
     FileIsDirectory,
+    FileReadError,
     GeneralError,
 }
 
@@ -46,6 +47,9 @@ fn handle_errors(err: ProgramError) -> ! {
         ProgramError::FileIsDirectory => {
             eprintln!("Error: file is directory");
         }
+        ProgramError::FileReadError => {
+            eprintln!("Error: failed to read file");
+        }
         ProgramError::GeneralError => {
             eprintln!("Error: something went wrong");
         }
@@ -60,14 +64,17 @@ fn main() {
         handle_errors(err);
     }
 
-    let mut f = match prepare_file(&args[0]) {
+    let f = match prepare_file(&args[0]) {
         Ok(file) => file,
         Err(err) => {
             handle_errors(err);
         }
     };
 
-    let mut buff = String::new();
-    let _ = f.read_to_string(&mut buff);
-    println!("{}", buff);
+    let mut lexer = Lexer::new(f);
+    if let Err(_) = lexer.lex() {
+        handle_errors(ProgramError::FileReadError);
+    }
+    
+    println!("{:?}", lexer.tokens());
 }
